@@ -1,8 +1,6 @@
 services:
-  - type: worker
-    name: quotex-bot
+  - type: web
+    name: quotex-bot-web
     env: python
-    region: frankfurt
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "python bot.py"
-    autoDeploy: true
+    startCommand: "uvicorn main:app --host 0.0.0.0 --port 10000"
