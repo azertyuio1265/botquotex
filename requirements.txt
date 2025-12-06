@@ -4,3 +4,4 @@ aiohttp
 cryptography
 rich
 git+https://github.com/cleitonleonel/pyquotex.git
+python-multipart
