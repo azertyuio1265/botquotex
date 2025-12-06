@@ -1,8 +1,6 @@
 fastapi
 uvicorn
-quotexapi
 aiohttp
-jinja2
-rich
 cryptography
+rich
 git+https://github.com/cleitonleonel/pyquotex.git
