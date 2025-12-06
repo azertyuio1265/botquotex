@@ -5,3 +5,4 @@ aiohttp
 jinja2
 rich
 cryptography
+git+https://github.com/cleitonleonel/pyquotex.git
