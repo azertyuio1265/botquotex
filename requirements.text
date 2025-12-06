@@ -1,6 +1,7 @@
-pyquotex
+fastapi
+uvicorn
+quotexapi
 aiohttp
+jinja2
 rich
 cryptography
-websockets
-requests
