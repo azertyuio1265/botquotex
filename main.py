@@ -50,6 +50,91 @@ async def home():
     """
 
 
+# -----------------------------------------------------------
+# ░░ هنا نضع البوت نفسه بدل ملف bot_runner المفقود ░░
+# -----------------------------------------------------------
+
+async def run_bot(config):
+    """
+    الكود الحقيقي للبوت يوضع هنا.
+    لكي لا نخلق مشاكل على Render، نستورد quotex داخل هذه الوظيفة فقط.
+    """
+
+    import asyncio
+    from quotexapi.stable_api import Quotex
+
+    email = config["email"]
+    password = config["password"]
+    amount = config["amount"]
+    account = config["account"]
+    tp = config["tp"]
+    sl = config["sl"]
+    asset = config["asset"]
+
+    print("🚀 بدء تشغيل البوت...")
+
+    # الاتصال
+    client = Quotex(email, password)
+
+    if not client.connect():
+        print("❌ فشل تسجيل الدخول")
+        return
+
+    print("✔ تم تسجيل الدخول بنجاح")
+
+    # اختيار الحساب
+    if account == "practice":
+        client.change_account("practice")
+    else:
+        client.change_account("real")
+
+    print(f"💰 الحساب المختار: {account}")
+
+    profit = 0
+    loss = 0
+
+    # حلقة التداول الأساسية
+    while True:
+        try:
+            print(f"🔄 تنفيذ الصفقة على {asset} بقيمة {amount}")
+            order = client.buy(amount, asset, "turbo")
+
+            if order:
+                print("✔ الصفقة أُرسلت")
+
+                # انتظار انتهاء الصفقة
+                await asyncio.sleep(40)
+
+                result = client.check_win(order)
+
+                if result > 0:
+                    profit += result
+                    print(f"🟢 ربح: {result} | إجمالي الأرباح: {profit}")
+                else:
+                    loss += abs(result)
+                    print(f"🔴 خسارة: {abs(result)} | إجمالي الخسائر: {loss}")
+
+                # TP / SL
+                if profit >= tp:
+                    print("🎉 Take Profit تحقق! إيقاف البوت.")
+                    break
+                if loss >= sl:
+                    print("⛔ Stop Loss تحقق! إيقاف البوت.")
+                    break
+
+            else:
+                print("⚠ فشل إرسال الصفقة!")
+
+            await asyncio.sleep(3)
+
+        except Exception as e:
+            print("⚠ خطأ:", e)
+            await asyncio.sleep(5)
+
+
+# -----------------------------------------------------------
+
+
 @app.post("/start", response_class=HTMLResponse)
 async def start(
     email: str = Form(...),
@@ -62,10 +147,7 @@ async def start(
     account: str = Form(...)
 ):
 
-    # استيراد مكتبة quotex هنا بشكل متأخر
-    # حتى لا يحدث crash أثناء إقلاع Render
-    from bot_runner import run_bot
-
+    # تجهيز الإعدادات
     config = {
         "email": email,
         "password": password,
